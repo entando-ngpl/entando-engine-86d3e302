@@ -10,7 +10,7 @@ on:
       - synchronize
       - reopened
     branches:
-      - develop
+      - develop-luca
 
 jobs:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -193,3 +193,34 @@ jobs:
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
           ~/ppl-run @pr-labels "CLEAN-SKIP-OWASP" remove "skip-owasp"
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # PREVIEW TAG
+  release-preview:
+    needs: [ 'sonar', 'owasp', 'tests' ]
+    env:
+      PPL_CONTEXT: ${{ toJson(github) }}
+      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      REPO_FOLDER: "repo_folder"
+      ENTANDO_OPT_LOG_LEVEL: DEBUG
+    runs-on: ubuntu-latest
+    steps:
+      - name: "CONFIGURE ENTANDO-PIPELINES"
+        run: |
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+      - name: "Checkout"
+        run: |
+          ~/ppl-run checkout-pr-branch "$REPO_FOLDER"
+      - name: "Cache Maven packages"
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: "Set up Java 11"
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: "Update artifact version"
+        run: |
+          ppl--generate-version "preview-version"
