@@ -196,7 +196,7 @@ jobs:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # PREVIEW TAG
   release-preview:
-#    needs: [ 'sonar', 'owasp', 'tests' ]
+    needs: [ 'sonar', 'owasp', 'tests' ]
     env:
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
