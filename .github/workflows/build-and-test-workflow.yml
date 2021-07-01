@@ -210,7 +210,7 @@ jobs:
           source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
       - name: "Checkout"
         run: |
-          ~/ppl-run checkout-pr-branch "$REPO_FOLDER"
+          ~/ppl-run checkout-pr-branch "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
       - name: "Cache Maven packages"
         uses: actions/cache@v2
         with:
@@ -223,5 +223,4 @@ jobs:
           java-version: 11
       - name: "Tag preview version"
         run: |
-          sudo apt-get install xmlstarlet &> /dev/null
           ~/ppl-run generate-version "PREVIEW-VERSION-GENERATION" preview-version "$REPO_FOLDER"
