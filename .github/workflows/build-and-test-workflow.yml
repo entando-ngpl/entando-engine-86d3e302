@@ -208,13 +208,13 @@ jobs:
       - name: "CONFIGURE ENTANDO-PIPELINES"
         run: |
           source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
-      - name: "Checkout"
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 #      - name: "Checkout"
-#        run: |
-#          ~/ppl-run checkout-pr-branch "$REPO_FOLDER"
+#        uses: actions/checkout@v2
+#        with:
+#          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: "Checkout"
+        run: |
+          ~/ppl-run checkout-pr-branch "$REPO_FOLDER"
       - name: "Cache Maven packages"
         uses: actions/cache@v2
         with:
@@ -227,4 +227,4 @@ jobs:
           java-version: 11
       - name: "Tag preview version"
         run: |
-          ~/ppl-run generate-version "preview-version"
+          ~/ppl-run generate-version "preview-version" "$REPO_FOLDER"
