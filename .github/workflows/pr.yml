@@ -1,7 +1,12 @@
-# This workflow will prepare every thing required to proceed with a PR
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+# PR workflow:
+# - preflight checks
+# - build
+# - tests
+# - owasp checks
+# - sonacloud checks
+# - tag-preview
 
-name: Build and Test
+name: PR
 
 on:
   pull_request:
@@ -14,8 +19,8 @@ on:
 
 jobs:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # PREPARE
-  prepare:
+  # PREFLIGHT
+  preflight-ckeck:
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       ENTANDO_OPT_LOG_LEVEL: TRACE
@@ -25,12 +30,12 @@ jobs:
       REPO_FOLDER: "repo_folder"
     runs-on: ubuntu-latest
     steps:
-      - name: "PR PIPELINE START"
+      - name: "PR WORKFLOW START"
         run: |
           source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run \
             pr-status-report --AND \
-            @pr-labels "REMOVE-LABEL-PREPARED" remove "prepared"  # in order to trigger the related label event
+            @pr-labels "REMOVE-LABEL-PREFLIGHT-CHECK" remove "preflight-check"
       - name: "Checkout"
         run: |
           ~/ppl-run checkout-pr-branch "$REPO_FOLDER"
@@ -43,12 +48,12 @@ jobs:
       - name: "entando-core-bom check"
         id: pr-bom-check
         run: |
-          ~/ppl-run @pr-labels "ADD-LABEL-PREPARED" add "prepared"
+          ~/ppl-run @pr-labels "ADD-LABEL-PREFLIGHT-CHECK" add "preflight-check"
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # SONAR
   sonar:
-    needs: [ 'prepare' ]
+    needs: [ 'preflight-check' ]
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
@@ -97,7 +102,7 @@ jobs:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # BUILD AND TEST
   tests:
-    needs: [ 'prepare' ]
+    needs: [ 'preflight-check' ]
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
@@ -150,7 +155,7 @@ jobs:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # OWASP
   owasp:
-    needs: [ 'prepare' ]
+    needs: [ 'preflight-check' ]
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
@@ -197,3 +202,25 @@ jobs:
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
           ~/ppl-run @pr-labels "CLEAN-SKIP-OWASP" remove "skip-owasp"
+
+          
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # TAG PREVIEW
+  tag-preview:
+    needs: [ 'tests', 'sonar', 'owasp' ]
+    env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+      ENTANDO_OPT_LOG_LEVEL: TRACE
+      PPL_CONTEXT: ${{ toJson(github) }}
+      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      REPO_FOLDER: "repo_folder"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "CONFIGURE ENTANDO-PIPELINES"
+        run: |
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run checkout-pr-branch "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
+      - name: "Tag preview release"
+        run: |
+          ~/ppl-run start-version "PREVIEW-RELEASE-GENERATION" preview-version "$REPO_FOLDER"
