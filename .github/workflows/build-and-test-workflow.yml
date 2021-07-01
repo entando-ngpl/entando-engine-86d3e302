@@ -223,4 +223,4 @@ jobs:
           java-version: 11
       - name: "Tag preview version"
         run: |
-          ~/ppl-run generate-version "preview-version" "repo_folder"
+          ~/ppl-run "PREVIEW-VERSION-GENERATION" generate-version "preview-version" "$REPO_FOLDER"
