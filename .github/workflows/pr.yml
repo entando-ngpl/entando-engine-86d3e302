@@ -20,7 +20,7 @@ on:
 jobs:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # PREFLIGHT
-  preflight-ckeck:
+  preflight-check:
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       ENTANDO_OPT_LOG_LEVEL: TRACE
@@ -205,8 +205,8 @@ jobs:
 
           
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # TAG PREVIEW
-  tag-preview:
+  # PREVIEW RELEASE
+  preview-release:
     needs: [ 'tests', 'sonar', 'owasp' ]
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
@@ -223,4 +223,4 @@ jobs:
           ~/ppl-run checkout-pr-branch "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
       - name: "Tag preview release"
         run: |
-          ~/ppl-run start-version "PREVIEW-RELEASE-GENERATION" preview-version "$REPO_FOLDER"
+          ~/ppl-run start-release "PREVIEW-RELEASE" preview-release "$REPO_FOLDER"
