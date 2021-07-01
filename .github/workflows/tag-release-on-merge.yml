@@ -21,6 +21,7 @@ jobs:
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "repo_folder"
     runs-on: ubuntu-latest
+    steps:
       - name: "TAG-RELEASE WORKFLOW START"
         run: |
           source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
@@ -29,5 +30,3 @@ jobs:
             checkout-pr-branch "$REPO_FOLDER" --AND \
             start-release "TAG-RELEASE" tag-release "$REPO_FOLDER" \
           ;
-      - name: "Checkout"
-        run: |
