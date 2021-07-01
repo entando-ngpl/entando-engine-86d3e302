@@ -17,16 +17,17 @@ jobs:
   # PREPARE
   prepare:
     env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+      ENTANDO_OPT_LOG_LEVEL: TRACE
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "repo_folder"
-      ENTANDO_OPT_LOG_LEVEL: TRACE
     runs-on: ubuntu-latest
     steps:
       - name: "PR PIPELINE START"
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run \
             pr-status-report --AND \
             @pr-labels "REMOVE-LABEL-PREPARED" remove "prepared"  # in order to trigger the related label event
@@ -49,6 +50,7 @@ jobs:
   sonar:
     needs: [ 'prepare' ]
     env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -58,7 +60,7 @@ jobs:
       - name: "SONAR GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ppl--gate-check SONAR
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
@@ -97,6 +99,7 @@ jobs:
   tests:
     needs: [ 'prepare' ]
     env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -119,7 +122,7 @@ jobs:
       - name: "TESTS GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ppl--gate-check TESTS
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
@@ -149,6 +152,7 @@ jobs:
   owasp:
     needs: [ 'prepare' ]
     env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -157,7 +161,7 @@ jobs:
       - name: "OWASP GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ppl--gate-check OWASP
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
