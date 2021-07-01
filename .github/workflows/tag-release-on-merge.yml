@@ -12,7 +12,7 @@ on:
       - develop
 
 jobs:
-  finalize:
+  tag-release-on-merge:
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       ENTANDO_OPT_LOG_LEVEL: TRACE
@@ -33,4 +33,4 @@ jobs:
       - name: "Start Release"
         id: start-release
         run: |
-          ~/ppl-run start-release "TAG-RELEASE" tag-release "$REPO_FOLDER"
+          ~/ppl-run start-release "TAG-RELEASE" tag-release ""
