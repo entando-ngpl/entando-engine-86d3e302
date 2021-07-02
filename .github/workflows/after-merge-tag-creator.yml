@@ -30,4 +30,4 @@ jobs:
           ~/ppl-run checkout-branch "CHECKOUT FOR RELEASE TAG" base "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
       - name: "Tag version"
         run: |
-          ~/ppl-run start-release "TAG GENERATION" tag-release "$REPO_FOLDER"
+          ~/ppl-run release "TAG GENERATION" prepare-tag-release "$REPO_FOLDER"
