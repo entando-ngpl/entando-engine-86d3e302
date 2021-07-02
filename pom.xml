@@ -10,7 +10,7 @@
     <groupId>org.entando.entando</groupId>
     <artifactId>entando-engine</artifactId>
     <packaging>jar</packaging>
-    <version>1.3.0</version>
+    <version>6.3.0-SNAPSHOT</version>
     <name>Entando Core: Engine</name>
     <description>Entando Engine: an agile, modern and user-centric open source Portal platform.</description>
     <url>http://www.entando.com/</url>
@@ -502,7 +502,7 @@
             <url>https://nexus-jx.apps.serv.run/repository/ngpl-maven-releases/</url>
         </repository>
     </distributionManagement>
-    
+
     <profiles>
       <profile>
         <id>owasp-dependency-check</id>

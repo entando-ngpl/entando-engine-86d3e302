@@ -1,0 +1,46 @@
+name: Release on internal Nexus
+
+on:
+  push:
+    tags:
+      - 'p*'
+      - 'v*'
+
+jobs:
+  release-nexus:
+    env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+      PPL_CONTEXT: ${{ toJson(github) }}
+      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      REPO_FOLDER: "repo_folder"
+      ENTANDO_OPT_LOG_LEVEL: DEBUG
+    runs-on: ubuntu-latest
+    steps:
+      - name: "PR PIPELINE START"
+        run: |
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          ~/ppl-run \
+            pr-status-report
+      - name: "Checkout"
+        run: |
+          ~/ppl-run checkout-branch "CHECKOUT FOR NEXUS PUBLICATION" base "$REPO_FOLDER"
+      - name: "Cache Maven packages"
+        uses: actions/cache@v2sour
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: "Set up Entando Nexus Repository"
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+          server-id: internal-nexus
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+      - name: "Publish package"
+        run: |
+          ~/ppl-run mvn NEXUS-DEPLOY
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
