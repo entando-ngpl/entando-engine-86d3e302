@@ -38,7 +38,7 @@ jobs:
             @pr-labels "REMOVE-LABEL-PREFLIGHT-CHECK" remove "preflight-check"
       - name: "Checkout"
         run: |
-          ~/ppl-run checkout-pr-branch "$REPO_FOLDER"
+          ~/ppl-run checkout-branch "CHECKOUT-PR" pr "$REPO_FOLDER"
       # PR FORMAT CHECK
       - name: "PR format check"
         id: pr-format-check
@@ -220,7 +220,7 @@ jobs:
       - name: "CONFIGURE ENTANDO-PIPELINES"
         run: |
           source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ~/ppl-run checkout-pr-branch "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
+          ~/ppl-run checkout-branch "CHECKOUT-PR" pr "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
       - name: "Tag preview release"
         run: |
           ~/ppl-run start-release "PREVIEW-RELEASE" preview-release "$REPO_FOLDER"
