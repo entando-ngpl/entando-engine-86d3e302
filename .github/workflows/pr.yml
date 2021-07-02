@@ -15,7 +15,7 @@ on:
       - synchronize
       - reopened
     branches:
-      - develop
+      - develop-luca
 
 jobs:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -23,7 +23,10 @@ jobs:
   preflight-check:
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+<<<<<<< HEAD:.github/workflows/pr.yml
       ENTANDO_OPT_LOG_LEVEL: TRACE
+=======
+>>>>>>> develop-luca:.github/workflows/build-and-test-workflow.yml
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -38,7 +41,11 @@ jobs:
             @pr-labels "REMOVE-LABEL-PREFLIGHT-CHECK" remove "preflight-check"
       - name: "Checkout"
         run: |
+<<<<<<< HEAD:.github/workflows/pr.yml
           ~/ppl-run checkout-branch "CHECKOUT-PR" pr "$REPO_FOLDER"
+=======
+          ~/ppl-run checkout-branch "CHECKOUT PR FOR PREPARATION" pr "$REPO_FOLDER"
+>>>>>>> develop-luca:.github/workflows/build-and-test-workflow.yml
       # PR FORMAT CHECK
       - name: "PR format check"
         id: pr-format-check
@@ -202,6 +209,7 @@ jobs:
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
           ~/ppl-run @pr-labels "CLEAN-SKIP-OWASP" remove "skip-owasp"
+<<<<<<< HEAD:.github/workflows/pr.yml
 
           
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,12 +223,35 @@ jobs:
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "local-checkout"
+=======
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # PREVIEW TAG
+  release-preview:
+    needs: [ 'sonar', 'owasp', 'tests' ]
+    env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+      PPL_CONTEXT: ${{ toJson(github) }}
+      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      REPO_FOLDER: "repo_folder"
+      ENTANDO_OPT_LOG_LEVEL: TRACE
+>>>>>>> develop-luca:.github/workflows/build-and-test-workflow.yml
     runs-on: ubuntu-latest
     steps:
       - name: "CONFIGURE ENTANDO-PIPELINES"
         run: |
           source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+<<<<<<< HEAD:.github/workflows/pr.yml
           ~/ppl-run checkout-branch "CHECKOUT-PR" pr "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
       - name: "Tag preview release"
         run: |
           ~/ppl-run start-release "PREVIEW-RELEASE" preview-release "$REPO_FOLDER"
+=======
+      - name: "Checkout"
+        run: |
+          ~/ppl-run checkout-branch "CHECKOUT FOR PREVIEW RELEASE" pr "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
+      - name: "Tag preview version"
+        run: |
+          ~/ppl-run start-release "PREVIEW VERSION TAG GENERATION" preview-release "$REPO_FOLDER"
+
+>>>>>>> develop-luca:.github/workflows/build-and-test-workflow.yml
