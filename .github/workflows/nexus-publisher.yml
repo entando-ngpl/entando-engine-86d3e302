@@ -43,7 +43,9 @@ jobs:
       - name: "Publish package"
         run: |
           cd "$REPO_FOLDER"
-          ~/ppl-run mvn NEXUS-DEPLOY
+          ~/ppl-run \
+              release "RELEASE-FINALIZATION" auto-finalize-release --AND \
+              mvn "INTERNAL-PUBLICATON"
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
