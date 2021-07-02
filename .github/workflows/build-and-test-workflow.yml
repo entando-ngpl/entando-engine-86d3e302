@@ -218,5 +218,5 @@ jobs:
           ~/ppl-run checkout-branch "CHECKOUT FOR PREVIEW RELEASE" pr "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
       - name: "Tag preview version"
         run: |
-          ~/ppl-run start-release "PREVIEW VERSION TAG GENERATION" preview-release "$REPO_FOLDER"
+          ~/ppl-run release "PREVIEW VERSION TAG GENERATION" prepare-preview-release "$REPO_FOLDER"
 
