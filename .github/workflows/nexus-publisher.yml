@@ -26,7 +26,7 @@ jobs:
         run: |
           ~/ppl-run checkout-branch "CHECKOUT FOR NEXUS PUBLICATION" base "$REPO_FOLDER"
       - name: "Cache Maven packages"
-        uses: actions/cache@v2sour
+        uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
