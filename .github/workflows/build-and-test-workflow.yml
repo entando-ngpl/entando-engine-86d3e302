@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: "PR PIPELINE START"
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run \
             pr-status-report --AND \
             @pr-labels "REMOVE-LABEL-PREPARED" remove "prepared"  # in order to trigger the related label event
@@ -60,7 +60,7 @@ jobs:
       - name: "SONAR GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ppl--gate-check SONAR
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
@@ -122,7 +122,7 @@ jobs:
       - name: "TESTS GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ppl--gate-check TESTS
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
@@ -161,7 +161,7 @@ jobs:
       - name: "OWASP GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ppl--gate-check OWASP
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'

@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: "PR PIPELINE START"
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run \
             pr-status-report
       - name: "Checkout"
