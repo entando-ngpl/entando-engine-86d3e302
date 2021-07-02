@@ -19,7 +19,7 @@ jobs:
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
-      REPO_FOLDER: "repo_folder"
+      REPO_FOLDER: "local-checkout"
     runs-on: ubuntu-latest
     steps:
       - name: "TAG-RELEASE WORKFLOW START"
@@ -28,4 +28,4 @@ jobs:
           ~/ppl-run \
             pr-status-report --AND \
             checkout-branch "CHECKOUT-BASE" base "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}" --AND \
-            start-release "TAG-RELEASE" tag-release ""
+            start-release "TAG-RELEASE" tag-release "$REPO_FOLDER"

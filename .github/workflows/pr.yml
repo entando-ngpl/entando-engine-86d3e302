@@ -27,7 +27,7 @@ jobs:
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
-      REPO_FOLDER: "repo_folder"
+      REPO_FOLDER: "local-checkout"
     runs-on: ubuntu-latest
     steps:
       - name: "PR WORKFLOW START"
@@ -214,7 +214,7 @@ jobs:
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
-      REPO_FOLDER: "repo_folder"
+      REPO_FOLDER: "local-checkout"
     runs-on: ubuntu-latest
     steps:
       - name: "CONFIGURE ENTANDO-PIPELINES"
