@@ -15,8 +15,8 @@ jobs:
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "repo_folder"
       ENTANDO_OPT_LOG_LEVEL: DEBUG
-      ENTANDO_OPT_MVN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MVN_REPO_DEVL }}
-      ENTANDO_OPT_MVN_REPO_PROD: ${{ secrets.ENTANDO_OPT_MVN_REPO_PROD }} # TO REMOVE => NEEDED ONLY IN PROD DEPLOYMENT
+      ENTANDO_OPT_MAVEN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_DEVL }}
+      ENTANDO_OPT_MAVEN_REPO_PROD: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_PROD }} # TO REMOVE => NEEDED ONLY IN PROD DEPLOYMENT
     runs-on: ubuntu-latest
     steps:
       - name: "PR PIPELINE START"
@@ -43,7 +43,9 @@ jobs:
       - name: "Publish package"
         run: |
           cd "$REPO_FOLDER"
-          ~/ppl-run mvn NEXUS-DEPLOY
+          ~/ppl-run \
+              release "RELEASE-FINALIZATION" auto-finalize-release --AND \
+              mvn "INTERNAL-PUBLICATON"
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
