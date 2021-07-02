@@ -17,6 +17,7 @@ jobs:
   # PREPARE
   prepare:
     env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -32,7 +33,7 @@ jobs:
             @pr-labels "REMOVE-LABEL-PREPARED" remove "prepared"  # in order to trigger the related label event
       - name: "Checkout"
         run: |
-          ~/ppl-run checkout-pr-branch "$REPO_FOLDER"
+          ~/ppl-run checkout-branch "CHECKOUT PR FOR PREPARATION" pr "$REPO_FOLDER"
       # PR FORMAT CHECK
       - name: "PR format check"
         id: pr-format-check
@@ -49,6 +50,7 @@ jobs:
   sonar:
     needs: [ 'prepare' ]
     env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -97,6 +99,7 @@ jobs:
   tests:
     needs: [ 'prepare' ]
     env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -149,6 +152,7 @@ jobs:
   owasp:
     needs: [ 'prepare' ]
     env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -198,6 +202,7 @@ jobs:
   release-preview:
     needs: [ 'sonar', 'owasp', 'tests' ]
     env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -207,20 +212,11 @@ jobs:
     steps:
       - name: "CONFIGURE ENTANDO-PIPELINES"
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/engine-exp/macro/install.sh")
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
       - name: "Checkout"
         run: |
-          ~/ppl-run checkout-pr-branch "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
-      - name: "Cache Maven packages"
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: "Set up Java 11"
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
+          ~/ppl-run checkout-branch "CHECKOUT FOR PREVIEW RELEASE" pr "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
       - name: "Tag preview version"
         run: |
-          ~/ppl-run generate-version "PREVIEW-VERSION-GENERATION" preview-version "$REPO_FOLDER"
+          ~/ppl-run start-release "PREVIEW VERSION TAG GENERATION" preview-release "$REPO_FOLDER"
+
