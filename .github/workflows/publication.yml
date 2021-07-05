@@ -42,8 +42,7 @@ jobs:
           server-password: MAVEN_PASSWORD
       - name: "Publish package"
         run: |
-          cd "$REPO_FOLDER"
-          ~/ppl-run mvn INTERNAL-PUBLICATON
+          ~/ppl-run mvn "PUBLICATION" "$REPO_FOLDER" PUBLISH
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
