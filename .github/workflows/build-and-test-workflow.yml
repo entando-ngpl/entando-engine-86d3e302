@@ -219,4 +219,3 @@ jobs:
       - name: "Tag preview version"
         run: |
           ~/ppl-run start-release "PREVIEW VERSION TAG GENERATION" preview-release "$REPO_FOLDER"
-
