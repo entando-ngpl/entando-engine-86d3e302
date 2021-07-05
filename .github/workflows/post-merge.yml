@@ -36,3 +36,4 @@ jobs:
       run: |
           cd "$REPO_FOLDER"
           ~/ppl-run bom "UPDATE-BOM-AFTER-MERGE" update-reference
+
