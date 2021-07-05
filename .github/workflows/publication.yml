@@ -44,7 +44,7 @@ jobs:
       - name: "Publish package"
         run: |
           cd "$REPO_FOLDER"
-          ~/ppl-run mvn NEXUS-DEPLOY
+          ~/ppl-run mvn INTERNAL-PUBLICATON
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
