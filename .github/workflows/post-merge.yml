@@ -1,0 +1,39 @@
+# Tag Release workflow:
+# - build
+# - tests
+# - owasp checks
+# - sonacloud checks
+
+name: After Merge
+
+on:
+  push:
+    branches:
+      - develop-luca
+
+jobs:
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # TAG
+  add-release-tag:
+    env:
+      PPL_CONTEXT: ${{ toJson(github) }}
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+      ENTANDO_OPT_REPO_BOM_URL: ${{ secrets.ENTANDO_OPT_REPO_BOM_URL }}
+      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      REPO_FOLDER: "local-checkout"
+      ENTANDO_OPT_LOG_LEVEL: TRACE
+    runs-on: ubuntu-latest
+    steps:
+      - name: "ADD RELEASE TAG"
+        run: |
+          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run \
+            pr-status-report --AND \
+            checkout-branch "CHECKOUT-BASE" base "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}" --AND \
+            release "TAG-RELEASE" prepare-tag-release "$REPO_FOLDER"
+      - name: "UPDATE BOM"
+        run: |
+            cd "$REPO_FOLDER"
+            ~/ppl-run bom "UPDATE-BOM-AFTER-MERGE" update-reference
+
