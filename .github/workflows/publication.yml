@@ -16,8 +16,7 @@ jobs:
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "repo_folder"
       ENTANDO_OPT_LOG_LEVEL: DEBUG
-      ENTANDO_OPT_MVN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MVN_REPO_DEVL }}
-      ENTANDO_OPT_MVN_REPO_PROD: ${{ secrets.ENTANDO_OPT_MVN_REPO_PROD }} # TO REMOVE => NEEDED ONLY IN PROD DEPLOYMENT
+      ENTANDO_OPT_MAVEN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_DEVL }}
     runs-on: ubuntu-latest
     steps:
       - name: "PR PIPELINE START"
