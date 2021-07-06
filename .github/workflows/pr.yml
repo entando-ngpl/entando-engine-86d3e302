@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: "PR PIPELINE START"
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run \
             pr-status-report --AND \
             @pr-labels "REMOVE-LABEL-PREPARED" remove "prepared"  # in order to trigger the related label event
@@ -55,13 +55,14 @@ jobs:
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      ENTANDO_OPT_LOG_LEVEL: TRACE
     runs-on: ubuntu-latest
     steps:
       - name: "SONAR GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ppl--gate-check SONAR
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run gate-check SONAR
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/checkout@v2
@@ -89,7 +90,7 @@ jobs:
       - name: "Build and analyze"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn SONAR
+          ~/ppl-run mvn "BUILD-SONAR" SONAR "-"
       - name: "Clean SKIP-SONAR"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
@@ -122,8 +123,8 @@ jobs:
       - name: "TESTS GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ppl--gate-check TESTS
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run gate-check TESTS
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/checkout@v2
@@ -142,7 +143,7 @@ jobs:
       - name: "Build and run tests"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn BUILD-AND-TEST "${{ matrix.mvn-test-group }}"
+          ~/ppl-run mvn "BUILD-AND-TEST" BUILD-AND-TEST "-" "${{ matrix.mvn-test-group }}"
       - name: "Clean SKIP-TESTS"
         if: steps.GATE.outputs.ENABLED != 'true' && matrix.remove-label
         run: |
@@ -161,8 +162,8 @@ jobs:
       - name: "OWASP GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ppl--gate-check OWASP
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run gate-check OWASP
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/checkout@v2
@@ -181,7 +182,7 @@ jobs:
       - name: "Build and run tests"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn BUILD-AND-TEST "${{ matrix.mvn-test-group }}"
+          ~/ppl-run mvn "BUILD-AND-TEST" BUILD-AND-TEST "-" "${{ matrix.mvn-test-group }}"
       - name: "Cache Maven packages"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/cache@v2
@@ -192,7 +193,7 @@ jobs:
       - name: "OWASP checks"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn OWASP
+          ~/ppl-run mvn "OWASP" OWASP "-"
       - name: "Clean SKIP-OWASP"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
@@ -219,4 +220,3 @@ jobs:
       - name: "Tag preview version"
         run: |
           ~/ppl-run release "PREVIEW VERSION TAG GENERATION" prepare-preview-release "$REPO_FOLDER"
-
