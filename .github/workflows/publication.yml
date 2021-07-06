@@ -49,5 +49,5 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       - name: "BOM Update"
         run: |
-          ~/ppl-run bom "UPDATE-BOM" update-bom "$REPO_FOLDER"
+          ~/ppl-run bom "UPDATE-BOM" update-bom "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}"
 
