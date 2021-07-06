@@ -16,7 +16,9 @@ jobs:
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "repo_folder"
       ENTANDO_OPT_LOG_LEVEL: DEBUG
-      ENTANDO_OPT_MAVEN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MVN_REPO_DEVL }}
+      ENTANDO_OPT_MAVEN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_DEVL }}
+      ENTANDO_OPT_MAVEN_REPO_PROD: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_PROD }}
+      ENTANDO_BOT_TOKEN: ${{ secrets.ENTANDO_BOT_TOKEN }}
     runs-on: ubuntu-latest
     steps:
       - name: "PR PIPELINE START"
@@ -42,12 +44,12 @@ jobs:
           server-password: MAVEN_PASSWORD
       - name: "Publish package"
         run: |
-          cd "$REPO_FOLDER"
-          ~/ppl-run mvn INTERNAL-PUBLICATON
+          ~/ppl-run mvn "PUBLICATION" "$REPO_FOLDER" PUBLISH
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       - name: "BOM Update"
         run: |
-          ~/ppl-run bom "UPDATE-BOM" update-bom "$REPO_FOLDER"
+          ~/ppl-run bom "UPDATE-BOM" update-bom "$REPO_FOLDER" "$ENTANDO_BOT_TOKEN"
+
 
