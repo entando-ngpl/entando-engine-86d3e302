@@ -34,7 +34,6 @@ import org.entando.entando.ent.exception.EntException;
  */
 public abstract class AbstractConfigLoader {
 
-
 	private static final EntLogger _logger = EntLogFactory.getSanitizedLogger(AbstractConfigLoader.class);
 
 	protected List<String> loadDefinitionPaths() throws Throwable {
