@@ -31,3 +31,4 @@ jobs:
             pr-status-report --AND \
             checkout-branch "CHECKOUT-BASE" base "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}" --AND \
             release "TAG-RELEASE" prepare-tag-release "$REPO_FOLDER"
+
