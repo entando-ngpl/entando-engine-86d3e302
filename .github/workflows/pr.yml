@@ -57,6 +57,7 @@ jobs:
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      REPO_FOLDER: "repo_folder"
     runs-on: ubuntu-latest
     steps:
       - name: "SONAR GATE CHECK"
@@ -65,10 +66,8 @@ jobs:
           bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run gate-check SONAR
       - name: "Checkout"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+        run: |
+          ~/ppl-run checkout-branch pr --id "CHECKOUT PR FOR PREPARATION" --lcd "$REPO_FOLDER"
       - name: "Set up JDK 11"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/setup-java@v1
@@ -91,7 +90,7 @@ jobs:
       - name: "Build and analyze"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn SONAR
+          ~/ppl-run mvn SONAR --lcd "$REPO_FOLDER"
       - name: "Clean SKIP-SONAR"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
@@ -144,7 +143,7 @@ jobs:
       - name: "Build and run tests"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn BUILD-AND-TEST "${{ matrix.mvn-test-group }}"
+          ~/ppl-run mvn BUILD-AND-TEST "${{ matrix.mvn-test-group }}" --id "BUILD-AND-TEST"
       - name: "Clean SKIP-TESTS"
         if: steps.GATE.outputs.ENABLED != 'true' && matrix.remove-label
         run: |
@@ -158,6 +157,7 @@ jobs:
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      REPO_FOLDER: "repo_folder"
     runs-on: ubuntu-latest
     steps:
       - name: "OWASP GATE CHECK"
@@ -166,8 +166,8 @@ jobs:
           bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run gate-check OWASP
       - name: "Checkout"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        uses: actions/checkout@v2
+        run: |
+          ~/ppl-run checkout-branch pr --id "CHECKOUT PR FOR PREPARATION" --lcd "$REPO_FOLDER"
       - name: "Cache Maven packages"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/cache@v2
@@ -183,7 +183,7 @@ jobs:
       - name: "Build and run tests"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn BUILD-AND-TEST "${{ matrix.mvn-test-group }}"
+          ~/ppl-run mvn BUILD-AND-TEST --id "BUILD-AND-TEST" --lcd "$REPO_FOLDER"
       - name: "Cache Maven packages"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/cache@v2
@@ -194,7 +194,7 @@ jobs:
       - name: "OWASP checks"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn OWASP
+          ~/ppl-run mvn OWASP --id "OWASP" --lcd "$REPO_FOLDER"
       - name: "Clean SKIP-OWASP"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
