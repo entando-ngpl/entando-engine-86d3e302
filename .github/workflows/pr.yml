@@ -1,7 +1,7 @@
 # This workflow will prepare every thing required to proceed with a PR
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Build and Test
+name: PR
 
 on:
   pull_request:
@@ -46,54 +46,6 @@ jobs:
         run: |
           ~/ppl-run \
             @pr-labels add "prepared" --id "ADD-LABEL-PREPARED"
-  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # SONAR
-  sonar:
-    needs: [ 'prepare' ]
-    env:
-      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
-      PPL_CONTEXT: ${{ toJson(github) }}
-      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
-      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      REPO_FOLDER: "repo_folder"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "SONAR GATE CHECK"
-        id: GATE
-        run: |
-          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ~/ppl-run gate-check SONAR
-      - name: "Checkout"
-        run: |
-          ~/ppl-run checkout-branch pr --id "CHECKOUT PR FOR PREPARATION" --lcd "$REPO_FOLDER"
-      - name: "Set up JDK 11"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: "Cache Maven packages"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: "Cache SonarCloud packages"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        uses: actions/cache@v2
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: "Build and analyze"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        run: |
-          ~/ppl-run mvn SONAR --lcd "$REPO_FOLDER"
-      - name: "Clean SKIP-SONAR"
-        if: steps.GATE.outputs.ENABLED != 'true'
-        run: |
-          ~/ppl-run @pr-labels remove "skip-sonar" --id "CLEAN-SKIP-SONAR"
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # BUILD AND TEST
   tests:
@@ -148,6 +100,54 @@ jobs:
         run: |
           ~/ppl-run @pr-labels remove "skip-tests" --id "CLEAN-SKIP-TEST"
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # SONAR
+  sonar:
+    needs: [ 'prepare' ]
+    env:
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+      PPL_CONTEXT: ${{ toJson(github) }}
+      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      REPO_FOLDER: "repo_folder"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "SONAR GATE CHECK"
+        id: GATE
+        run: |
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run gate-check SONAR
+      - name: "Checkout"
+        run: |
+          ~/ppl-run checkout-branch pr --id "CHECKOUT PR FOR PREPARATION" --lcd "$REPO_FOLDER"
+      - name: "Set up JDK 11"
+        if: steps.GATE.outputs.ENABLED == 'true'
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: "Cache Maven packages"
+        if: steps.GATE.outputs.ENABLED == 'true'
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: "Cache SonarCloud packages"
+        if: steps.GATE.outputs.ENABLED == 'true'
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: "Build and analyze"
+        if: steps.GATE.outputs.ENABLED == 'true'
+        run: |
+          ~/ppl-run mvn SONAR --lcd "$REPO_FOLDER"
+      - name: "Clean SKIP-SONAR"
+        if: steps.GATE.outputs.ENABLED != 'true'
+        run: |
+          ~/ppl-run @pr-labels remove "skip-sonar" --id "CLEAN-SKIP-SONAR"
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # OWASP
   owasp:
     needs: [ 'prepare' ]
@@ -193,7 +193,7 @@ jobs:
       - name: "OWASP checks"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn OWASP --id "OWASP" --lcd "$REPO_FOLDER"
+          ~/ppl-run mvn OWASP --lcd "$REPO_FOLDER"
       - name: "Clean SKIP-OWASP"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
