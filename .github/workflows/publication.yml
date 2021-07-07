@@ -7,7 +7,7 @@ on:
       - 'v*'
 
 jobs:
-  release-nexus:
+  internal-publication:
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       ENTANDO_OPT_REPO_BOM_URL: ${{ secrets.ENTANDO_OPT_REPO_BOM_URL }}
@@ -16,17 +16,18 @@ jobs:
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "repo_folder"
       ENTANDO_OPT_LOG_LEVEL: DEBUG
-      ENTANDO_OPT_MAVEN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MVN_REPO_DEVL }}
+      ENTANDO_OPT_MAVEN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_DEVL }}
+      ENTANDO_OPT_MAVEN_REPO_PROD: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_PROD }}
+      ENTANDO_BOT_TOKEN: ${{ secrets.ENTANDO_BOT_TOKEN }}
     runs-on: ubuntu-latest
     steps:
       - name: "PR PIPELINE START"
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ~/ppl-run \
-            pr-status-report
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run status-report
       - name: "Checkout"
         run: |
-          ~/ppl-run checkout-branch "CHECKOUT FOR NEXUS PUBLICATION" base "$REPO_FOLDER"
+          ~/ppl-run checkout-branch base --id "CHECKOUT FOR NEXUS PUBLICATION" --lcd "$REPO_FOLDER"
       - name: "Cache Maven packages"
         uses: actions/cache@v2
         with:
@@ -42,12 +43,13 @@ jobs:
           server-password: MAVEN_PASSWORD
       - name: "Publish package"
         run: |
-          cd "$REPO_FOLDER"
-          ~/ppl-run mvn INTERNAL-PUBLICATON
+          ~/ppl-run mvn PUBLISH --id "PUBLICATION" --lcd "$REPO_FOLDER"
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       - name: "BOM Update"
         run: |
-          ~/ppl-run bom "UPDATE-BOM" update-bom "$REPO_FOLDER"
-
+          ~/ppl-run bom update-bom \
+            --id "UPDATE-BOM" \
+            --lcd "$REPO_FOLDER" \
+            --token "$ENTANDO_BOT_TOKEN"

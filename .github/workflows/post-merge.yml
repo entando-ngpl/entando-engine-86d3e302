@@ -27,13 +27,26 @@ jobs:
     steps:
       - name: "ADD RELEASE TAG"
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ~/ppl-run \
-            pr-status-report --AND \
-            checkout-branch "CHECKOUT-BASE" base "$REPO_FOLDER" "${{ secrets.ENTANDO_BOT_TOKEN }}" --AND \
-            release "TAG-RELEASE" prepare-tag-release "$REPO_FOLDER"
-      - name: "UPDATE BOM"
-        run: |
-            cd "$REPO_FOLDER"
-            ~/ppl-run bom "UPDATE-BOM-AFTER-MERGE" update-reference
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          cat ~/.entando/ppl/entando-pipelines/macro/github/checkout-branch.sh
+          cd ~/.entando/ppl/entando-pipelines
+          git branch
+          git fetch --all
+          git fetch --tags
+          echo "$BRANCH" | sed -E 's/(.)/\1_/g'
+          BRANCH="${ENTANDO_OPT_USE_PPL_TAG:-master}"
+          git checkout -B "$BRANCH" "$BRANCH"
+          echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+          ~/ppl-run pr-status-report \
+          --AND checkout-branch base \
+                --id "CHECKOUT-BASE" \
+                --lcd "$REPO_FOLDER" \
+                --token "${{ secrets.ENTANDO_BOT_TOKEN }}" \
+          --AND release prepare-tag-release \
+                --id "TAG-RELEASE" \
+                --lcd "$REPO_FOLDER"
