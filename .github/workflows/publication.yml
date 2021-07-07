@@ -7,7 +7,7 @@ on:
       - 'v*'
 
 jobs:
-  release-nexus:
+  internal-publication:
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       ENTANDO_OPT_REPO_BOM_URL: ${{ secrets.ENTANDO_OPT_REPO_BOM_URL }}

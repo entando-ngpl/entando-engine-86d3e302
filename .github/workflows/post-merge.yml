@@ -36,4 +36,3 @@ jobs:
             .. release prepare-tag-release \
               --id "TAG-RELEASE" \
               --lcd "$REPO_FOLDER"
-

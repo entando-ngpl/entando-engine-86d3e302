@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: "PR PIPELINE START"
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run \
             pr-status-report \
             .. @pr-labels remove "prepared" \
@@ -65,8 +65,8 @@ jobs:
       - name: "SONAR GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ppl--gate-check SONAR
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run gate-check SONAR
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/checkout@v2
@@ -100,6 +100,7 @@ jobs:
         run: |
           ~/ppl-run @pr-labels remove "skip-sonar" \
             --id "CLEAN-SKIP-SONAR"
+            
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # BUILD AND TEST
   tests:
@@ -128,8 +129,8 @@ jobs:
       - name: "TESTS GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ppl--gate-check TESTS
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run gate-check TESTS
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/checkout@v2
@@ -154,6 +155,7 @@ jobs:
         run: |
           ~/ppl-run @pr-labels remove "skip-tests" \
             --id "CLEAN-SKIP-TEST"
+            
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # OWASP
   owasp:
@@ -168,8 +170,8 @@ jobs:
       - name: "OWASP GATE CHECK"
         id: GATE
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-          ppl--gate-check OWASP
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          ~/ppl-run gate-check OWASP
       - name: "Checkout"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/checkout@v2
@@ -205,6 +207,7 @@ jobs:
         run: |
           ~/ppl-run @pr-labels remove "skip-owasp" \
             --id "CLEAN-SKIP-OWASP"
+
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # PREVIEW TAG
   release-preview:
@@ -220,7 +223,7 @@ jobs:
     steps:
       - name: "CONFIGURE ENTANDO-PIPELINES"
         run: |
-          source <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
+          bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
       - name: "Checkout"
         run: |
           ~/ppl-run checkout-branch pr \
