@@ -32,10 +32,11 @@ import org.entando.entando.ent.exception.EntException;
  * Abstract config Loader Class.
  * @author E.Santoboni
  */
+
 public abstract class AbstractConfigLoader {
 
 	private static final EntLogger _logger = EntLogFactory.getSanitizedLogger(AbstractConfigLoader.class);
-	
+
 	protected List<String> loadDefinitionPaths() throws Throwable {
 		List<String> filenames = new ArrayList<String>();
 		try {
@@ -59,7 +60,7 @@ public abstract class AbstractConfigLoader {
 		}
 		return filenames;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void inspectResources(String currentFileName, String rootInspectionDir, List<String> confFiles) throws Throwable {
 		Set<String> resourcesPath = this.getServletContext().getResourcePaths(rootInspectionDir);
@@ -72,35 +73,35 @@ public abstract class AbstractConfigLoader {
 			} else {
 				this.inspectResources(currentFileName, current, confFiles);
 			}
-		}		
+		}
 	}
-	
+
 	private boolean isConfResource(String current, String currentFilename) {
 		String regExp = currentFilename.replaceAll(AXTER_REG_EXP, REG_EXP);
 		Pattern p = Pattern.compile(regExp);
 		Matcher m = p.matcher(current);
 		return m.matches();
 	}
-	
+
 	protected ServletContext getServletContext() {
 		return this._servletContext;
 	}
 	protected void setServletContext(ServletContext servletContext) {
 		this._servletContext = servletContext;
 	}
-	
+
 	protected String getDefinitionConfig() {
 		return _definitionConfig;
 	}
 	protected void setDefinitionConfig(String definitionConfig) {
 		this._definitionConfig = definitionConfig;
 	}
-	
+
 	private ServletContext _servletContext;
 	private String _definitionConfig;
-	
+
 	private final static String REG_EXP = "[\\\\w,\\\\-,_]*";
 	private final static String AXTER = "**";
 	private final static String AXTER_REG_EXP = "\\*\\*";
-	
+
 }
