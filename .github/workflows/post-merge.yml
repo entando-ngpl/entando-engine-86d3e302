@@ -1,15 +1,9 @@
-# Tag Release workflow:
-# - build
-# - tests
-# - owasp checks
-# - sonacloud checks
-
-name: After Merge
+name: AM
 
 on:
   push:
     branches:
-      - develop-luca
+      - develop
 
 jobs:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,7 +22,7 @@ jobs:
       - name: "ADD RELEASE TAG"
         run: |
           bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
-        
+
           ~/ppl-run pr-status-report \
           .. checkout-branch base \
                 --id "CHECKOUT-BASE" \
