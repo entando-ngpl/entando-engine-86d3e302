@@ -90,7 +90,7 @@ jobs:
       - name: "Build and analyze"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn SONAR --lcd "$REPO_FOLDER"
+          ~/ppl-run mvn SONAR --lcd "$REPO_FOLDER" --id "BUILD-SONAR"
       - name: "Clean SKIP-SONAR"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
@@ -180,10 +180,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: "Build and run tests"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        run: |
-          ~/ppl-run mvn BUILD-AND-TEST --id "BUILD-AND-TEST" --lcd "$REPO_FOLDER"
       - name: "Cache Maven packages"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/cache@v2
