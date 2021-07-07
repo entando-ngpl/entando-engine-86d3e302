@@ -96,7 +96,7 @@ jobs:
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
           ~/ppl-run mvn SONAR \
-            --lcd "-"
+            --id "BUILD-SONAR"
       - name: "Clean SKIP-SONAR"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
@@ -151,7 +151,9 @@ jobs:
       - name: "Build and run tests"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn "BUILD-AND-TEST" BUILD-AND-TEST "-" "${{ matrix.mvn-test-group }}"
+          ~/ppl-run mvn BUILD-AND-TEST \
+            --id "BUILD-AND-TEST" \
+            --token "${{ matrix.mvn-test-group }}"
       - name: "Clean SKIP-TESTS"
         if: steps.GATE.outputs.ENABLED != 'true' && matrix.remove-label
         run: |
@@ -192,7 +194,7 @@ jobs:
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
           ~/ppl-run mvn BUILD-AND-TEST "${{ matrix.mvn-test-group }}" \
-            --lcd "-"
+            --id "BUILD-AND-TEST"
       - name: "Cache Maven packages"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/cache@v2
@@ -204,7 +206,7 @@ jobs:
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
           ~/ppl-run mvn OWASP \
-            --lcd "-"
+            --id "OWASP"
       - name: "Clean SKIP-OWASP"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
@@ -238,3 +240,4 @@ jobs:
           ~/ppl-run release prepare-preview-release \
             --id "PREVIEW VERSION TAG GENERATION" \
             --lcd "$REPO_FOLDER"
+
