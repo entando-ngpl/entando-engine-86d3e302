@@ -32,6 +32,7 @@ import org.entando.entando.ent.exception.EntException;
  * Abstract config Loader Class.
  * @author E.Santoboni
  */
+
 public abstract class AbstractConfigLoader {
 
 	private static final EntLogger _logger = EntLogFactory.getSanitizedLogger(AbstractConfigLoader.class);

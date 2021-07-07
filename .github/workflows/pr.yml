@@ -18,6 +18,7 @@ jobs:
   prepare:
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+      ENTANDO_OPT_REPO_BOM_URL: ${{ secrets.ENTANDO_OPT_REPO_BOM_URL }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -29,26 +30,22 @@ jobs:
         run: |
           bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run \
-            pr-status-report \
-            .. @pr-labels remove "prepared" \
-              --id "REMOVE-LABEL-PREPARED"
+            pr-status-report .. \
+            @pr-labels remove "prepared" --id "REMOVE-LABEL-PREPARED"
       - name: "Checkout"
         run: |
-          ~/ppl-run checkout-branch pr \
-            --id "CHECKOUT PR FOR PREPARATION" \
-            --lcd "$REPO_FOLDER"
+          ~/ppl-run checkout-branch pr --id "CHECKOUT PR FOR PREPARATION" --lcd "$REPO_FOLDER"
       # PR FORMAT CHECK
       - name: "PR format check"
         id: pr-format-check
         run: |
-          ~/ppl-run check-pr-format \
-            --lcd "$REPO_FOLDER"
+          ~/ppl-run check-pr-format --lcd "$REPO_FOLDER"
       # BOM
       - name: "entando-core-bom check"
         id: pr-bom-check
         run: |
-          ~/ppl-run @pr-labels add "prepared" \
-            --id "ADD-LABEL-PREPARED"
+          ~/ppl-run \
+            @pr-labels add "prepared" --id "ADD-LABEL-PREPARED"
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # SONAR
@@ -60,7 +57,7 @@ jobs:
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      ENTANDO_OPT_LOG_LEVEL: TRACE
+      REPO_FOLDER: "repo_folder"
     runs-on: ubuntu-latest
     steps:
       - name: "SONAR GATE CHECK"
@@ -69,10 +66,8 @@ jobs:
           bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run gate-check SONAR
       - name: "Checkout"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+        run: |
+          ~/ppl-run checkout-branch pr --id "CHECKOUT PR FOR PREPARATION" --lcd "$REPO_FOLDER"
       - name: "Set up JDK 11"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/setup-java@v1
@@ -95,14 +90,11 @@ jobs:
       - name: "Build and analyze"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn SONAR \
-            --id "BUILD-SONAR"
+          ~/ppl-run mvn SONAR --lcd "$REPO_FOLDER" --id "BUILD-SONAR"
       - name: "Clean SKIP-SONAR"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
-          ~/ppl-run @pr-labels remove "skip-sonar" \
-            --id "CLEAN-SKIP-SONAR"
-
+          ~/ppl-run @pr-labels remove "skip-sonar" --id "CLEAN-SKIP-SONAR"
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # BUILD AND TEST
   tests:
@@ -151,14 +143,11 @@ jobs:
       - name: "Build and run tests"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn BUILD-AND-TEST \
-            --id "BUILD-AND-TEST" \
-            --token "${{ matrix.mvn-test-group }}"
+          ~/ppl-run mvn BUILD-AND-TEST "${{ matrix.mvn-test-group }}" --id "BUILD-AND-TEST"
       - name: "Clean SKIP-TESTS"
         if: steps.GATE.outputs.ENABLED != 'true' && matrix.remove-label
         run: |
-          ~/ppl-run @pr-labels remove "skip-tests" \
-            --id "CLEAN-SKIP-TEST"
+          ~/ppl-run @pr-labels remove "skip-tests" --id "CLEAN-SKIP-TEST"
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # OWASP
   owasp:
@@ -168,6 +157,7 @@ jobs:
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      REPO_FOLDER: "repo_folder"
     runs-on: ubuntu-latest
     steps:
       - name: "OWASP GATE CHECK"
@@ -176,8 +166,8 @@ jobs:
           bash <(curl -qsL "https://raw.githubusercontent.com/entando/entando-pipelines/${ENTANDO_OPT_USE_PPL_TAG}/macro/install.sh")
           ~/ppl-run gate-check OWASP
       - name: "Checkout"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        uses: actions/checkout@v2
+        run: |
+          ~/ppl-run checkout-branch pr --id "CHECKOUT PR FOR PREPARATION" --lcd "$REPO_FOLDER"
       - name: "Cache Maven packages"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/cache@v2
@@ -190,11 +180,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: "Build and run tests"
-        if: steps.GATE.outputs.ENABLED == 'true'
-        run: |
-          ~/ppl-run mvn BUILD-AND-TEST "${{ matrix.mvn-test-group }}" \
-            --id "BUILD-AND-TEST"
       - name: "Cache Maven packages"
         if: steps.GATE.outputs.ENABLED == 'true'
         uses: actions/cache@v2
@@ -205,14 +190,11 @@ jobs:
       - name: "OWASP checks"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn OWASP \
-            --id "OWASP"
+          ~/ppl-run mvn OWASP --id "OWASP" --lcd "$REPO_FOLDER"
       - name: "Clean SKIP-OWASP"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
-          ~/ppl-run @pr-labels remove "skip-owasp" \
-            --id "CLEAN-SKIP-OWASP"
-
+          ~/ppl-run @pr-labels remove "skip-owasp" --id "CLEAN-SKIP-OWASP"
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # PREVIEW TAG
   release-preview:
@@ -240,4 +222,3 @@ jobs:
           ~/ppl-run release prepare-preview-release \
             --id "PREVIEW VERSION TAG GENERATION" \
             --lcd "$REPO_FOLDER"
-
