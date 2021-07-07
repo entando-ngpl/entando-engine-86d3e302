@@ -1,0 +1,162 @@
+/*
+ * Copyright 2018-Present Entando Inc. (http://www.entando.com) All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+package org.entando.entando.web.role;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.validation.Valid;
+
+import com.agiletec.aps.system.services.role.Permission;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.entando.entando.aps.system.services.role.IRoleService;
+import org.entando.entando.aps.system.services.role.model.RoleDto;
+import org.entando.entando.aps.system.services.user.model.UserDto;
+import org.entando.entando.web.common.annotation.RestAccessControl;
+import org.entando.entando.web.common.exceptions.ValidationGenericException;
+import org.entando.entando.web.common.model.PagedMetadata;
+import org.entando.entando.web.common.model.PagedRestResponse;
+import org.entando.entando.web.common.model.RestListRequest;
+import org.entando.entando.web.common.model.SimpleRestResponse;
+import org.entando.entando.web.role.model.RoleRequest;
+import org.entando.entando.web.role.validator.RoleValidator;
+import org.entando.entando.ent.util.EntLogging.EntLogger;
+import org.entando.entando.ent.util.EntLogging.EntLogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(value = "/roles")
+public class RoleController {
+
+    private final EntLogger logger = EntLogFactory.getSanitizedLogger(getClass());
+
+    @Autowired
+    private IRoleService roleService;
+
+    @Autowired
+    private RoleDtotoRoleRequestConverter roleDtotoRoleRequestConverter;
+
+    @Autowired
+    private RoleValidator roleValidator;
+
+    public IRoleService getRoleService() {
+        return roleService;
+    }
+
+    public void setRoleService(IRoleService roleService) {
+        this.roleService = roleService;
+    }
+
+    public RoleValidator getRoleValidator() {
+        return roleValidator;
+    }
+
+    public void setRoleValidator(RoleValidator roleValidator) {
+        this.roleValidator = roleValidator;
+    }
+
+    @RestAccessControl(permission = { Permission.SUPERUSER, Permission.MANAGE_USERS})
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PagedRestResponse<RoleDto>> getRoles(RestListRequest requestList) throws JsonProcessingException {
+        this.getRoleValidator().validateRestListRequest(requestList, RoleDto.class);
+        PagedMetadata<RoleDto> result = this.getRoleService().getRoles(requestList);
+        this.getRoleValidator().validateRestListResult(requestList, result);
+        logger.debug("loading role list -> {}", result);
+        return new ResponseEntity<>(new PagedRestResponse<>(result), HttpStatus.OK);
+    }
+
+    @RestAccessControl(permission = Permission.SUPERUSER)
+    @RequestMapping(value = "/{roleCode}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SimpleRestResponse<RoleDto>> getRole(@PathVariable String roleCode) {
+        logger.debug("loading role {}", roleCode);
+        RoleDto role = this.getRoleService().getRole(roleCode);
+        return new ResponseEntity<>(new SimpleRestResponse<>(role), HttpStatus.OK);
+    }
+
+    @RestAccessControl(permission = Permission.SUPERUSER)
+    @RequestMapping(value = "/{roleCode}/userreferences", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PagedRestResponse<UserDto>> getRoleReferences(@PathVariable String roleCode, RestListRequest requestList) {
+        logger.debug("loading user references for role {}", roleCode);
+        PagedMetadata<UserDto> result = this.getRoleService().getRoleReferences(roleCode, requestList);
+        return new ResponseEntity<>(new PagedRestResponse<>(result), HttpStatus.OK);
+    }
+
+    @RestAccessControl(permission = Permission.SUPERUSER)
+    @RequestMapping(value = "/{roleCode}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SimpleRestResponse<RoleDto>> updateRole(@PathVariable String roleCode, @Valid @RequestBody RoleRequest roleRequest, BindingResult bindingResult) {
+        logger.debug("updating role {}", roleCode);
+        //field validations
+        if (bindingResult.hasErrors()) {
+            throw new ValidationGenericException(bindingResult);
+        }
+        this.getRoleValidator().validateBodyName(roleCode, roleRequest, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new ValidationGenericException(bindingResult);
+        }
+        RoleDto role = this.getRoleService().updateRole(roleRequest);
+        return new ResponseEntity<>(new SimpleRestResponse<>(role), HttpStatus.OK);
+    }
+
+    @RestAccessControl(permission = Permission.SUPERUSER)
+    @RequestMapping(value = "/{roleCode}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE, consumes="application/json-patch+json")
+    public ResponseEntity<SimpleRestResponse<RoleDto>> updateRole(@PathVariable String roleCode, @RequestBody JsonNode patchRequest, BindingResult bindingResult) {
+        logger.debug("update role {} with jsonpatch-request {}", roleCode, patchRequest);
+
+        this.getRoleValidator().validateJsonPatch(patchRequest, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new ValidationGenericException(bindingResult);
+        }
+
+        RoleDto patchedRoleDto = this.getRoleService().getPatchedRole(roleCode, patchRequest);
+        RoleRequest patchedRoleRequest = this.roleDtotoRoleRequestConverter.convert(patchedRoleDto);
+
+        return this.updateRole(roleCode, patchedRoleRequest, bindingResult);
+    }
+
+
+    @RestAccessControl(permission = Permission.SUPERUSER)
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SimpleRestResponse<RoleDto>> addRole(
+            @Valid @RequestBody RoleRequest roleRequest,
+            BindingResult bindingResult) {
+        logger.debug("adding role");
+        //field validations
+        if (bindingResult.hasErrors()) {
+            throw new ValidationGenericException(bindingResult);
+        }
+        RoleDto dto = this.getRoleService().addRole(roleRequest);
+        return new ResponseEntity<>(new SimpleRestResponse<>(dto), HttpStatus.OK);
+    }
+
+    @RestAccessControl(permission = Permission.SUPERUSER)
+    @RequestMapping(value = "/{roleCode}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SimpleRestResponse<Map<String, String>>> deleteRole(@PathVariable String roleCode) {
+        logger.info("deleting {}", roleCode);
+        this.getRoleService().removeRole(roleCode);
+        Map<String, String> result = new HashMap<>();
+        result.put("code", roleCode);
+        return new ResponseEntity<>(new SimpleRestResponse<>(result), HttpStatus.OK);
+    }
+
+}

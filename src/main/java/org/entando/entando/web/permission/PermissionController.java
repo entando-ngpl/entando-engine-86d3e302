@@ -1,0 +1,72 @@
+/*
+ * Copyright 2018-Present Entando Inc. (http://www.entando.com) All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+package org.entando.entando.web.permission;
+
+import com.agiletec.aps.system.services.role.Permission;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.entando.entando.aps.system.services.role.IRoleService;
+import org.entando.entando.aps.system.services.role.model.PermissionDto;
+import org.entando.entando.web.common.annotation.RestAccessControl;
+import org.entando.entando.web.common.model.PagedMetadata;
+import org.entando.entando.web.common.model.RestListRequest;
+import org.entando.entando.web.permission.validator.PermissionValidator;
+import org.entando.entando.ent.util.EntLogging.EntLogger;
+import org.entando.entando.ent.util.EntLogging.EntLogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import org.entando.entando.web.common.model.PagedRestResponse;
+
+@RestController
+@RequestMapping(value = "/permissions")
+public class PermissionController {
+
+    private final EntLogger logger = EntLogFactory.getSanitizedLogger(getClass());
+
+    @Autowired
+    private IRoleService roleService;
+    private PermissionValidator permissionValidator = new PermissionValidator();
+
+    public IRoleService getRoleService() {
+        return roleService;
+    }
+
+    public void setRoleService(IRoleService roleService) {
+        this.roleService = roleService;
+    }
+
+    public PermissionValidator getPermissionValidator() {
+        return permissionValidator;
+    }
+
+    public void setPermissionValidator(PermissionValidator roleValidator) {
+        this.permissionValidator = roleValidator;
+    }
+
+    @RestAccessControl(permission = Permission.ENTER_BACKEND)
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PagedRestResponse<PermissionDto>> getPermissions(RestListRequest requestList) throws JsonProcessingException {
+        this.getPermissionValidator().validateRestListRequest(requestList, PermissionDto.class);
+        PagedMetadata<PermissionDto> result = this.getRoleService().getPermissions(requestList);
+        this.getPermissionValidator().validateRestListResult(requestList, result);
+        logger.debug("Main Response -> {}", result);
+        return new ResponseEntity<>(new PagedRestResponse<>(result), HttpStatus.OK);
+    }
+
+}
