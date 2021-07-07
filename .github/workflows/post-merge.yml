@@ -22,6 +22,7 @@ jobs:
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "local-checkout"
+      ENTANDO_OPT_LOG_LEVEL: TRACE
     runs-on: ubuntu-latest
     steps:
       - name: "ADD RELEASE TAG"
@@ -32,8 +33,7 @@ jobs:
             .. checkout-branch base \
               --id "CHECKOUT-BASE" \
               --lcd "$REPO_FOLDER" \
-              --toekn "${{ secrets.ENTANDO_BOT_TOKEN }}" \
+              --token "${{ secrets.ENTANDO_BOT_TOKEN }}" \
             .. release prepare-tag-release \
               --id "TAG-RELEASE" \
               --lcd "$REPO_FOLDER"
-
