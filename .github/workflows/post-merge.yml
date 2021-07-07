@@ -1,4 +1,4 @@
-name: After Merge
+name: AM
 
 on:
   push:

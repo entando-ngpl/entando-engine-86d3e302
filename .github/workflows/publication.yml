@@ -1,4 +1,4 @@
-name: Release on internal Nexus
+name: PUB
 
 on:
   push:
@@ -27,14 +27,16 @@ jobs:
           ~/ppl-run status-report
       - name: "Checkout"
         run: |
-          ~/ppl-run checkout-branch base --id "CHECKOUT FOR NEXUS PUBLICATION" --lcd "$REPO_FOLDER"
+          ~/ppl-run checkout-branch base \
+            --id "CHECKOUT FOR NEXUS PUBLICATION" \
+            --lcd "$REPO_FOLDER"
       - name: "Cache Maven packages"
         uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: "Set up Entando Nexus Repository"
+      - name: "Conigure Entando Nexus Repository"
         uses: actions/setup-java@v1
         with:
           java-version: 11
@@ -43,7 +45,9 @@ jobs:
           server-password: MAVEN_PASSWORD
       - name: "Publish package"
         run: |
-          ~/ppl-run mvn PUBLISH --id "PUBLICATION" --lcd "$REPO_FOLDER"
+          ~/ppl-run mvn PUBLISH \
+            --id "PUBLICATION" \
+            --lcd "$REPO_FOLDER"
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
