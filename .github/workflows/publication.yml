@@ -27,7 +27,9 @@ jobs:
           ~/ppl-run status-report
       - name: "Checkout"
         run: |
-          ~/ppl-run checkout-branch "CHECKOUT FOR NEXUS PUBLICATION" base "$REPO_FOLDER"
+          ~/ppl-run checkout-branch base \
+            --id "CHECKOUT FOR NEXUS PUBLICATION" \
+            --lcd "$REPO_FOLDER"
       - name: "Cache Maven packages"
         uses: actions/cache@v2
         with:
@@ -43,10 +45,15 @@ jobs:
           server-password: MAVEN_PASSWORD
       - name: "Publish package"
         run: |
-          ~/ppl-run mvn "PUBLICATION" PUBLISH "$REPO_FOLDER"
+          ~/ppl-run mvn PUBLISH \
+            --id "PUBLICATION" \
+            --lcd "$REPO_FOLDER"
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       - name: "BOM Update"
         run: |
-          ~/ppl-run bom "UPDATE-BOM" update-bom "$REPO_FOLDER" "$ENTANDO_BOT_TOKEN"
+          ~/ppl-run bom update-bom \
+            --id "UPDATE-BOM" \
+            --lcd "$REPO_FOLDER" \
+            --token "$ENTANDO_BOT_TOKEN"
