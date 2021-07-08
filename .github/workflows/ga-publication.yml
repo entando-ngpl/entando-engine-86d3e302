@@ -14,7 +14,7 @@ jobs:
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "repo_folder"
-      ENTANDO_OPT_LOG_LEVEL: DEBUG
+      ENTANDO_OPT_LOG_LEVEL: TRACE
       ENTANDO_OPT_MAVEN_REPO_GA: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_GA }}
       ENTANDO_BOT_TOKEN: ${{ secrets.ENTANDO_BOT_TOKEN }}
     runs-on: ubuntu-latest
