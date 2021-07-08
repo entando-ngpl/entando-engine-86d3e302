@@ -42,9 +42,9 @@ jobs:
           server-id: maven-central
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-      - name: "Publish package"
+      - name: "Publish package to GA"
         run: |
-          ~/ppl-run mvn PUBLISH \
+          ~/ppl-run mvn GA-PUBLISH \
             --id "GA-PUBLICATION" \
             --lcd "$REPO_FOLDER"
         env:
