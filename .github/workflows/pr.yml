@@ -1,7 +1,7 @@
 # This workflow will prepare every thing required to proceed with a PR
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: PR
+name: PR-CYCLE
 
 on:
   pull_request:
@@ -60,16 +60,20 @@ jobs:
       max-parallel: 1 # ensure the sequential running of the spawned jobs
       matrix:
         # order matters: spawned jobs are execute as received in the array
-        test-type: [ 'fast-test', 'slow-and-fast-test' ]
+        #test-type: [ 'fast-test', 'slow-test' ]
+        test-type: [ 'all-tests' ]
         include:
           # includes the value of the rebase variable depending on the test type of the matrix
           # includes the dependency between the 2 generated jobs to ensure sequential runs
-          - test-type: 'fast-test'
-            mvn-test-group: 'fast-test'
+          - test-type: 'all-tests'
+            mvn-test-group: 'all-tests'
             remove-label: false
-          - test-type: 'slow-and-fast-test'
-            mvn-test-group: 'fast-test,slow-test'
-            remove-label: true
+          #- test-type: 'fast-test'
+          #  mvn-test-group: 'fast-test'
+          #  remove-label: false
+          #- test-type: 'slow-and-fast-test'
+          #  mvn-test-group: 'fast-test,slow-test'
+          #  remove-label: true
     steps:
       - name: "TESTS GATE CHECK"
         id: GATE
@@ -193,7 +197,7 @@ jobs:
       - name: "OWASP checks"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn OWASP --lcd "$REPO_FOLDER"
+          ~/ppl-run mvn OWASP --id "OWASP" --lcd "$REPO_FOLDER"
       - name: "Clean SKIP-OWASP"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |
