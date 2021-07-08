@@ -6,7 +6,7 @@ on:
       - created
 
 jobs:
-  publish:
+  ga-publish:
     env:
       ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       ENTANDO_OPT_REPO_BOM_URL: ${{ secrets.ENTANDO_OPT_REPO_BOM_URL }}
@@ -45,7 +45,7 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - name: "Publish package to GA"
         run: |
-          ~/ppl-run mvn GENERAL-PUBLICATON \
+          ~/ppl-run mvn GENERAL-PUBLICATION \
             --id "GA-PUBLICATION" \
             --lcd "$REPO_FOLDER"
         env:
