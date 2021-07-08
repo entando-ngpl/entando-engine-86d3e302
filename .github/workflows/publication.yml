@@ -1,4 +1,4 @@
-name: PUB
+name: Internal Publication
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: "Conigure Entando Nexus Repository"
+      - name: "Configure Entando Nexus Repository"
         uses: actions/setup-java@v1
         with:
           java-version: 11

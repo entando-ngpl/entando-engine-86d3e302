@@ -1,7 +1,7 @@
 # This workflow will prepare every thing required to proceed with a PR
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: PR
+name: PR-CYCLE
 
 on:
   pull_request:
@@ -193,7 +193,7 @@ jobs:
       - name: "OWASP checks"
         if: steps.GATE.outputs.ENABLED == 'true'
         run: |
-          ~/ppl-run mvn OWASP --lcd "$REPO_FOLDER"
+          ~/ppl-run mvn OWASP --id "OWASP" --lcd "$REPO_FOLDER"
       - name: "Clean SKIP-OWASP"
         if: steps.GATE.outputs.ENABLED != 'true'
         run: |

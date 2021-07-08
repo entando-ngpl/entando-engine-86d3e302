@@ -1,4 +1,4 @@
-name: AM
+name: Post-Merge
 
 on:
   push:
@@ -31,3 +31,4 @@ jobs:
           .. release prepare-tag-release \
                 --id "TAG-RELEASE" \
                 --lcd "$REPO_FOLDER"
+
