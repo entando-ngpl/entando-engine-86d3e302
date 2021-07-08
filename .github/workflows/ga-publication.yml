@@ -15,8 +15,7 @@ jobs:
       GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
       REPO_FOLDER: "repo_folder"
       ENTANDO_OPT_LOG_LEVEL: DEBUG
-      ENTANDO_OPT_MAVEN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_DEVL }}
-      ENTANDO_OPT_MAVEN_REPO_PROD: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_PROD }}
+      ENTANDO_OPT_MAVEN_REPO_GA: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_GA }}
       ENTANDO_BOT_TOKEN: ${{ secrets.ENTANDO_BOT_TOKEN }}
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +43,7 @@ jobs:
           server-password: MAVEN_PASSWORD
       - name: "Publish package to GA"
         run: |
-          ~/ppl-run mvn GA-PUBLISH \
+          ~/ppl-run mvn GENERAL-PUBLICATON \
             --id "GA-PUBLICATION" \
             --lcd "$REPO_FOLDER"
         env:
