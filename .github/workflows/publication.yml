@@ -57,7 +57,7 @@ jobs:
 #          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       - name: "Docker image publication"
         run: |
-          ~/ppl-run docker publish --id "DOCKER-PUBLICATION"
+          ~/ppl-run docker publish --id "DOCKER-PUBLICATION" --lcd "$REPO_FOLDER"
 
 #      - name: "BOM Update"
 #        run: |
