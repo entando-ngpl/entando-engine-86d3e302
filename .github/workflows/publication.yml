@@ -58,6 +58,7 @@ jobs:
       - name: "Docker image publication"
         run: |
           ~/ppl-run docker publish --id "DOCKER-PUBLICATION"
+
 #      - name: "BOM Update"
 #        run: |
 #          ~/ppl-run bom update-bom \
