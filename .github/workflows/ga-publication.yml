@@ -44,7 +44,7 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - name: "Publish package to GA"
         run: |
-          ~/ppl-run mvn GENERAL-PUBLICATION \
+          ~/ppl-run mvn GA-PUBLICATION \
             --id "GA-PUBLICATION" \
             --lcd "$REPO_FOLDER"
         env:
