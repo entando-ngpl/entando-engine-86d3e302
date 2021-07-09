@@ -9,7 +9,8 @@ on:
 jobs:
   publish:
     env:
-      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+      ENTANDO_OPT_USE_PPL_TAG: "PIPE_LUCA"
+      # ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       ENTANDO_OPT_REPO_BOM_URL: ${{ secrets.ENTANDO_OPT_REPO_BOM_URL }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
@@ -19,6 +20,7 @@ jobs:
       ENTANDO_OPT_MAVEN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_DEVL }}
       ENTANDO_OPT_MAVEN_REPO_PROD: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_PROD }}
       ENTANDO_BOT_TOKEN: ${{ secrets.ENTANDO_BOT_TOKEN }}
+      ENTANDO_OPT_DOCKERFILES: ${{ secrets.ENTANDO_OPT_DOCKERFILES }}
     runs-on: ubuntu-latest
     steps:
       - name: "PR PIPELINE START"
@@ -51,6 +53,9 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - name: "Docker image publication"
+        run: |
+          ~/ppl-run docker publish --id "DOCKER-PUBLICATION"
       - name: "BOM Update"
         run: |
           ~/ppl-run bom update-bom \
