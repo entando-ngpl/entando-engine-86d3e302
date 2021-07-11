@@ -60,20 +60,16 @@ jobs:
       max-parallel: 1 # ensure the sequential running of the spawned jobs
       matrix:
         # order matters: spawned jobs are execute as received in the array
-        #test-type: [ 'fast-test', 'slow-test' ]
-        test-type: [ 'all-tests' ]
+        test-type: [ 'fast-test', 'slow-and-fast-test' ]
         include:
           # includes the value of the rebase variable depending on the test type of the matrix
           # includes the dependency between the 2 generated jobs to ensure sequential runs
-          - test-type: 'all-tests'
-            mvn-test-group: 'all-tests'
+          - test-type: 'fast-test'
+            mvn-test-group: 'fast-test'
             remove-label: false
-          #- test-type: 'fast-test'
-          #  mvn-test-group: 'fast-test'
-          #  remove-label: false
-          #- test-type: 'slow-and-fast-test'
-          #  mvn-test-group: 'fast-test,slow-test'
-          #  remove-label: true
+          - test-type: 'slow-and-fast-test'
+            mvn-test-group: 'fast-test,slow-test'
+            remove-label: true
     steps:
       - name: "TESTS GATE CHECK"
         id: GATE
