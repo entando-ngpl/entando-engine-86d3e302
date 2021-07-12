@@ -5,6 +5,7 @@ on:
     types:
       - created
 
+
 jobs:
   ga-publish:
     env:
