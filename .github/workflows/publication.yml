@@ -57,3 +57,8 @@ jobs:
             --id "UPDATE-BOM" \
             --lcd "$REPO_FOLDER" \
             --token "$ENTANDO_BOT_TOKEN"
+      - name: "Publish docker"
+        run: |
+          ~/ppl-run docker publish "$ENTANDO_OPT_DOCKER_BUILDS"\
+            --id "PUBLISH-DOCKER" \
+            --lcd "$REPO_FOLDER"
