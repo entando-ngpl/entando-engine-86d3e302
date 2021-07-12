@@ -7,10 +7,9 @@ on:
       - 'v*'
 
 jobs:
-  publish:
+  internal-publication:
     env:
-      ENTANDO_OPT_USE_PPL_TAG: "PIPE_LUCA"
-      # ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
+      ENTANDO_OPT_USE_PPL_TAG: ${{ secrets.ENTANDO_OPT_USE_PPL_TAG }}
       ENTANDO_OPT_REPO_BOM_URL: ${{ secrets.ENTANDO_OPT_REPO_BOM_URL }}
       PPL_CONTEXT: ${{ toJson(github) }}
       GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
@@ -20,9 +19,6 @@ jobs:
       ENTANDO_OPT_MAVEN_REPO_DEVL: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_DEVL }}
       ENTANDO_OPT_MAVEN_REPO_PROD: ${{ secrets.ENTANDO_OPT_MAVEN_REPO_PROD }}
       ENTANDO_BOT_TOKEN: ${{ secrets.ENTANDO_BOT_TOKEN }}
-      ENTANDO_OPT_DOCKERFILES: ${{ secrets.ENTANDO_OPT_DOCKERFILES }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     runs-on: ubuntu-latest
     steps:
       - name: "PR PIPELINE START"
@@ -47,21 +43,22 @@ jobs:
           server-id: internal-nexus
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-#      - name: "Publish package"
-#        run: |
-#          ~/ppl-run mvn PUBLISH \
-#            --id "PUBLICATION" \
-#            --lcd "$REPO_FOLDER"
-#        env:
-#          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-#          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-      - name: "Docker image publication"
+      - name: "Publish package"
         run: |
-          ~/ppl-run docker publish --id "DOCKER-PUBLICATION" --lcd "$REPO_FOLDER"
-
-#      - name: "BOM Update"
-#        run: |
-#          ~/ppl-run bom update-bom \
-#            --id "UPDATE-BOM" \
-#            --lcd "$REPO_FOLDER" \
-#            --token "$ENTANDO_BOT_TOKEN"
+          ~/ppl-run mvn PUBLISH \
+            --id "PUBLICATION" \
+            --lcd "$REPO_FOLDER"
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - name: "BOM Update"
+        run: |
+          ~/ppl-run bom update-bom \
+            --id "UPDATE-BOM" \
+            --lcd "$REPO_FOLDER" \
+            --token "$ENTANDO_BOT_TOKEN"
+      - name: "Publish docker"
+        run: |
+          ~/ppl-run docker publish "$ENTANDO_OPT_DOCKER_BUILDS"\
+            --id "PUBLISH-DOCKER" \
+            --lcd "$REPO_FOLDER"
